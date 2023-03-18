@@ -1,45 +1,34 @@
 package main
 
+import (
+	"fmt"
+	"net"
+)
+
 type peer struct {
-  	conns []net.conn
+	connections []*net.UDPConn
 }
 
-func CreatePeerAndConnect(address string) peer {
-  	p := peer {
-    	connections: []net.conn {}
-  	}
-  	conn := // dial the address on udp
-  	p.conns = append(p.conns, conn)
-  
-  	return p
-}
+func CreatePeerAndConnect(address string) (*peer, error) {
+	// Create the first node
+	p := &peer{
+		connections: []*net.UDPConn{},
+	}
 
-func (p *peer) listen("udp", :"8080") {
-  // initialise udp listener
-	for {
-		conn, err := ln.Accept()
-    	if err != nil {
-      		fmt.Println("Error accepting connection: ", err.Error())
-			break
-    	}
-    go p.handleConnection(conn)
-  }
-}
-
-func (p *peer) handleConnection(conn net.Conn) {
-	defer conn.Close()
-	buff := make([]byte, 1024)
-	msg, err := conn.Read(buff)
+	// Resolve remote address
+	remoteAddr, err := net.ResolveUDPAddr("udp", address)
 	if err != nil {
-		fmt.Println("Error reading message: ", err.Error())
-		break
+		return nil, fmt.Errorf("error resolving remote address: %w", err)
 	}
-	
-	segments := msg.split(' ')
-	switch segments[0] { // command for rpc
-	case "new":
-	newAddress := segments[1] // payload, i.e. the address the new peer is listening on
-    // tell a random connection to connect to newAddress
-	case ...
+
+	// Dial UDP connection
+	conn, err := net.DialUDP("udp", nil, remoteAddr)
+	if err != nil {
+		return nil, fmt.Errorf("error dialing UDP connection: %w", err)
 	}
+
+	// Add connection to peer
+	p.connections = append(p.connections, conn)
+
+	return p, nil
 }
