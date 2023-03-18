@@ -32,3 +32,27 @@ func CreatePeerAndConnect(address string) (*peer, error) {
 
 	return p, nil
 }
+
+func main() {
+
+	firstNode := "localhost:8080"
+
+	secondNode, err := CreatePeerAndConnect(firstNode)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Instantiate test message
+	message := []byte("Hello World!")
+
+	// Send message to first node
+	_, err = secondNode.connections[0].Write(message)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// First node may need time to receive the message
+	// time.Sleep(1 * time.Second)
+}
